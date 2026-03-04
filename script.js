@@ -33,1031 +33,6 @@ class TerminalResume {
     this.init();
   }
 
-  init() {
-    // Apply saved theme
-    this.handleThemeChange(this.currentTheme);
-
-    // Set up modal close buttons
-    document.querySelectorAll(".close-button").forEach((button) => {
-      button.addEventListener("click", () => {
-        this.closeModal(button.closest(".modal"));
-      });
-    });
-
-    // Theme toggle
-    this.themeToggle.addEventListener("click", () => {
-      this.showModal(this.themeModal);
-    });
-
-    // Hide language toggle since we're removing that feature
-    const languageToggle = document.getElementById("language-toggle");
-    if (languageToggle && languageToggle.parentElement) {
-      languageToggle.parentElement.style.display = "none";
-    }
-
-    // Theme selection
-    document.querySelectorAll(".theme-option").forEach((option) => {
-      option.addEventListener("click", () => {
-        this.handleThemeChange(option.dataset.theme);
-      });
-    });
-
-    this.printWelcomeMessage();
-    this.input.focus();
-    this.setupContextMenu();
-  }
-
-  setupContextMenu() {
-    // Handle right-click on terminal content
-    this.terminalContainer.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      const terminalContent = e.target.closest(".terminal-content");
-      if (terminalContent) {
-        this.activeTerminalContent = terminalContent;
-        this.showContextMenu(e.clientX, e.clientY);
-      }
-    });
-
-    // Hide context menu on click outside
-    document.addEventListener("click", () => {
-      this.contextMenu.classList.remove("active");
-    });
-
-    // Handle menu item clicks
-    this.contextMenu.addEventListener("click", (e) => {
-      const action = e.target.dataset.action;
-      if (action) {
-        this.handleContextMenuAction(action);
-      }
-    });
-  }
-
-  showContextMenu(x, y) {
-    this.contextMenu.style.left = `${x}px`;
-    this.contextMenu.style.top = `${y}px`;
-    this.contextMenu.classList.add("active");
-
-    // Show/hide close option based on whether this terminal can be closed
-    const closeOption = this.contextMenu.querySelector(
-      '[data-action="close-split"]'
-    );
-    const isMainTerminal =
-      this.activeTerminalContent === this.terminalContainer.firstElementChild;
-    closeOption.style.display = isMainTerminal ? "none" : "block";
-  }
-
-  handleContextMenuAction(action) {
-    if (!this.activeTerminalContent) return;
-
-    switch (action) {
-      case "split-h":
-        this.splitTerminal("horizontal", this.activeTerminalContent);
-        break;
-      case "split-v":
-        this.splitTerminal("vertical", this.activeTerminalContent);
-        break;
-      case "close-split":
-        this.closeSplit(this.activeTerminalContent);
-        break;
-    }
-    this.contextMenu.classList.remove("active");
-  }
-
-  setupEventListeners() {
-    // Global click handler for terminal focus
-    this.terminalContainer.addEventListener("click", (e) => {
-      const terminalContent = e.target.closest(".terminal-content");
-      if (terminalContent) {
-        const input = terminalContent.querySelector("input");
-        if (input) {
-          input.focus();
-          this.activeTerminal = this.terminals.findIndex(
-            (t) => t.input === input
-          );
-        }
-      }
-    });
-
-    // Global keyboard shortcuts
-    document.addEventListener("keydown", (e) => {
-      // Ctrl + Shift + H for horizontal split
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "h") {
-        e.preventDefault();
-        const activeContent =
-          this.terminals[this.activeTerminal].input.closest(
-            ".terminal-content"
-          );
-        if (activeContent) {
-          this.splitTerminal("horizontal", activeContent);
-        }
-      }
-      // Ctrl + Shift + V for vertical split
-      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "v") {
-        e.preventDefault();
-        const activeContent =
-          this.terminals[this.activeTerminal].input.closest(
-            ".terminal-content"
-          );
-        if (activeContent) {
-          this.splitTerminal("vertical", activeContent);
-        }
-      }
-    });
-
-    // Setup initial input handlers
-    this.setupInputHandlers(this.input);
-  }
-
-  setupInputHandlers(inputElement) {
-    inputElement.addEventListener("keydown", (e) => {
-      const terminal = this.terminals.find((t) => t.input === inputElement);
-      if (!terminal) return;
-
-      if (e.key === "Enter") {
-        this.handleCommand(inputElement);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        this.navigateHistory("up", terminal);
-      } else if (e.key === "ArrowDown") {
-        e.preventDefault();
-        this.navigateHistory("down", terminal);
-      } else if (e.key === "l" && e.ctrlKey) {
-        // Handle Ctrl+L (clear screen)
-        e.preventDefault();
-        const outputElement = inputElement
-          .closest(".terminal-content")
-          .querySelector("[id^='output']");
-        outputElement.innerHTML = "";
-        this.printWelcomeMessage(outputElement);
-      } else if (e.key === "Tab") {
-        // Handle Tab completion
-        e.preventDefault();
-        this.handleTabCompletion(inputElement);
-      }
-    });
-  }
-
-  handleTabCompletion(inputElement) {
-    const currentInput = inputElement.value.toLowerCase().trim();
-    const commands = [
-      "help",
-      "about",
-      "skills",
-      "experience",
-      "education",
-      "contact",
-      "clear",
-      "projects",
-      "skills-visual",
-      "game",
-      "exit-game",
-      "matrix",
-      "stop-matrix",
-      "weather",
-      "calc",
-      "calculate",
-      "pdf",
-    ];
-
-    // Find matching commands
-    const matches = commands.filter((cmd) => cmd.startsWith(currentInput));
-
-    if (matches.length === 1) {
-      // Single match - complete the command
-      inputElement.value = matches[0];
-    } else if (matches.length > 1 && currentInput) {
-      // Multiple matches - show possibilities
-      const outputElement = inputElement
-        .closest(".terminal-content")
-        .querySelector("[id^='output']");
-
-      const matchesText = `\nPossible commands:\n${matches.join("  ")}`;
-      this.printToOutput(outputElement, matchesText, "info");
-    }
-  }
-
-  navigateHistory(direction, terminal) {
-    if (
-      direction === "up" &&
-      terminal.historyIndex < terminal.history.length - 1
-    ) {
-      terminal.historyIndex++;
-    } else if (direction === "down" && terminal.historyIndex > -1) {
-      terminal.historyIndex--;
-    }
-
-    if (
-      terminal.historyIndex >= 0 &&
-      terminal.historyIndex < terminal.history.length
-    ) {
-      terminal.input.value =
-        terminal.history[terminal.history.length - 1 - terminal.historyIndex];
-    } else {
-      terminal.input.value = "";
-    }
-  }
-
-  splitTerminal(direction, sourceTerminal) {
-    const parentContainer = sourceTerminal.parentElement;
-    const isAlreadySplit = parentContainer.children.length > 1;
-    const splitClass = direction === "horizontal" ? "split-h" : "split-v";
-
-    // If parent is not split or split in different direction, create new container
-    if (!isAlreadySplit || !parentContainer.classList.contains(splitClass)) {
-      const newContainer = document.createElement("div");
-      newContainer.className = `terminal-container ${splitClass}`;
-
-      // Move source terminal to new container
-      sourceTerminal.parentElement.insertBefore(newContainer, sourceTerminal);
-      newContainer.appendChild(sourceTerminal);
-
-      // Create new terminal in the container
-      this.createNewTerminalContent(newContainer);
-    } else {
-      // Add new terminal to existing split container
-      this.createNewTerminalContent(parentContainer);
-    }
-  }
-
-  createNewTerminalContent(container) {
-    const newContent = document.createElement("div");
-    newContent.className = "terminal-content";
-    const timestamp = Date.now();
-    newContent.innerHTML = `
-      <div id="output-${timestamp}" class="terminal-output"></div>
-      <div class="input-line">
-        <span class="prompt">➜</span>
-        <input type="text" id="command-input-${timestamp}" class="command-input" />
-      </div>
-    `;
-
-    // Add resize handle if not the last element
-    if (container.children.length > 0) {
-      const handle = document.createElement("div");
-      handle.className = `resize-handle ${
-        container.classList.contains("split-h") ? "horizontal" : "vertical"
-      }`;
-      container.lastElementChild.appendChild(handle);
-      this.setupResizeHandle(handle);
-    }
-
-    container.appendChild(newContent);
-
-    // Setup new input
-    const newInput = newContent.querySelector(".command-input");
-    this.setupInputHandlers(newInput);
-
-    // Add to terminals array
-    this.terminals.push({
-      input: newInput,
-      history: [],
-      historyIndex: -1,
-    });
-
-    // Print welcome message in new terminal
-    const newOutput = newContent.querySelector(`#output-${timestamp}`);
-    this.printWelcomeMessage(newOutput);
-
-    // Focus new terminal
-    newInput.focus();
-    this.activeTerminal = this.terminals.length - 1;
-  }
-
-  setupResizeHandle(handle) {
-    const isHorizontal = handle.classList.contains("horizontal");
-
-    const startResize = (e) => {
-      e.preventDefault();
-      this.resizing = {
-        handle,
-        startX: e.clientX,
-        startY: e.clientY,
-        parentContainer: handle.closest(".terminal-container"),
-        element: handle.parentElement,
-        initialSize: isHorizontal
-          ? handle.parentElement.offsetWidth
-          : handle.parentElement.offsetHeight,
-      };
-
-      document.addEventListener("mousemove", resize);
-      document.addEventListener("mouseup", stopResize);
-    };
-
-    const resize = (e) => {
-      if (!this.resizing) return;
-
-      const { parentContainer, element, startX, startY, initialSize } =
-        this.resizing;
-      const containerRect = parentContainer.getBoundingClientRect();
-
-      if (isHorizontal) {
-        const deltaX = e.clientX - startX;
-        const newWidth = initialSize + deltaX;
-        const maxWidth = containerRect.width - 150; // Leave space for other splits
-
-        if (newWidth >= 150 && newWidth <= maxWidth) {
-          const percentage = (newWidth / containerRect.width) * 100;
-          element.style.flex = "none";
-          element.style.width = `${percentage}%`;
-        }
-      } else {
-        const deltaY = e.clientY - startY;
-        const newHeight = initialSize + deltaY;
-        const maxHeight = containerRect.height - 100;
-
-        if (newHeight >= 100 && newHeight <= maxHeight) {
-          const percentage = (newHeight / containerRect.height) * 100;
-          element.style.flex = "none";
-          element.style.height = `${percentage}%`;
-        }
-      }
-    };
-
-    const stopResize = () => {
-      this.resizing = null;
-      document.removeEventListener("mousemove", resize);
-      document.removeEventListener("mouseup", stopResize);
-    };
-
-    handle.addEventListener("mousedown", startResize);
-  }
-
-  printToOutput(outputElement, text, className = "", useTypewriter = false) {
-    if (!text) {
-      outputElement.innerHTML = "";
-      return Promise.resolve();
-    }
-
-    const line = document.createElement("div");
-    line.className = className;
-
-    // Ensure consistent text formatting
-    line.style.whiteSpace = "pre-wrap";
-    line.style.marginBottom = "0.5rem";
-
-    outputElement.appendChild(line);
-
-    // Force scroll to bottom
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-
-    if (useTypewriter && !text.includes("<")) {
-      // For plain text, use typewriter effect
-      return this.typeText(line, text, 20);
-    } else if (useTypewriter && text.includes("<")) {
-      // For HTML content, use HTML typewriter
-      return this.typeHTML(line, text, 20);
-    } else {
-      // No typewriter effect
-      line.textContent = text;
-      return Promise.resolve();
-    }
-  }
-
-  scrollToBottom(terminalContent) {
-    if (!terminalContent) return;
-
-    // Only scroll if content is actually overflowing
-    if (terminalContent.scrollHeight > terminalContent.clientHeight) {
-      const currentScrollTop = terminalContent.scrollTop;
-      const maxScroll =
-        terminalContent.scrollHeight - terminalContent.clientHeight;
-
-      // If we're not already at the bottom, scroll
-      if (currentScrollTop < maxScroll) {
-        terminalContent.scrollTop = maxScroll;
-
-        // Use requestAnimationFrame to ensure scroll happens after render
-        requestAnimationFrame(() => {
-          terminalContent.scrollTop = maxScroll;
-        });
-      }
-    }
-  }
-
-  handleCommand(inputElement) {
-    const terminal = this.terminals.find((t) => t.input === inputElement);
-    if (!terminal) return;
-
-    const command = inputElement.value.trim().toLowerCase();
-    const outputElement = inputElement
-      .closest(".terminal-content")
-      .querySelector("[id^='output']");
-
-    this.printToOutput(outputElement, `➜ ${command}`, "command");
-    terminal.history.push(command);
-    terminal.historyIndex = -1;
-    inputElement.value = "";
-
-    // Parse command and arguments
-    const [cmd, ...args] = command.split(" ");
-
-    // Execute command
-    switch (cmd) {
-      case "help":
-        this.showHelp(outputElement);
-        break;
-      case "about":
-        this.showAbout(outputElement);
-        break;
-      case "experience":
-        this.showExperience(outputElement);
-        break;
-      case "education":
-        this.showEducation(outputElement);
-        break;
-      case "skills":
-        this.showSkills(outputElement);
-        break;
-      case "contact":
-        this.showContact(outputElement);
-        break;
-      case "clear":
-        outputElement.innerHTML = "";
-        this.printWelcomeMessage(outputElement);
-        break;
-      case "projects":
-        this.showProjects();
-        break;
-      case "skills-visual":
-        this.showSkillsVisualization();
-        break;
-      case "game":
-        this.initGame();
-        break;
-      case "pdf":
-        this.generatePDF();
-        break;
-      case "linkedin-cover":
-        this.generateLinkedInCover(outputElement);
-        break;
-      case "exit-game":
-        this.endGame();
-        this.printToOutput(outputElement, "Game exited.", "info");
-        break;
-      case "matrix":
-        this.startMatrixEffect(outputElement);
-        break;
-      case "stop-matrix":
-        this.stopMatrixEffect();
-        this.printToOutput(outputElement, "Matrix effect stopped.", "info");
-        break;
-      case "weather":
-        this.showWeather(args.join(" "), outputElement);
-        break;
-      case "calc":
-      case "calculate":
-        this.calculate(args.join(" "), outputElement);
-        break;
-      case "":
-        break;
-      default:
-        this.printToOutput(
-          outputElement,
-          `Command not found: ${command}. Type 'help' for available commands.`,
-          "error"
-        );
-    }
-
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  printWelcomeMessage(outputElement = this.output) {
-    const asciiArt = `███╗   ███╗ █████╗ ██████╗ ██╗ ██████╗
-████╗ ████║██╔══██╗██╔══██╗██║██╔═══██╗
-██╔████╔██║███████║██████╔╝██║██║   ██║
-██║╚██╔╝██║██╔══██║██╔══██╗██║██║   ██║
-██║ ╚═╝ ██║██║  ██║██║  ██║██║╚██████╔╝
-╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ `;
-
-    const divider = "─────────────────────────────────────────────────";
-
-    const welcome =
-      this.wrapWithColor(asciiArt + "\n", "#d4843e") +
-      this.wrapWithColor(divider + "\n", "#555555") +
-      this.wrapWithColor(
-        "              Interactive Terminal Resume\n",
-        "#888888"
-      ) +
-      this.wrapWithColor(
-        "         Software Engineer • Cloud Architect • Tech Lead\n",
-        "#666666"
-      ) +
-      this.wrapWithColor(divider + "\n\n", "#555555") +
-      this.wrapWithColor("Type ", "#666666") +
-      this.wrapWithColor("'help'", "#87af87") +
-      this.wrapWithColor(" to see available commands\n", "#666666") +
-      this.wrapWithColor("Press ", "#666666") +
-      this.wrapWithColor("'tab'", "#87af87") +
-      this.wrapWithColor(" to auto-complete commands", "#666666");
-
-    const helpDiv = document.createElement("div");
-    helpDiv.innerHTML = welcome;
-    outputElement.appendChild(helpDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  showHelp(outputElement = this.output) {
-    const title = this.wrapWithColor("🚀 Available Commands\n\n", "#ffff00");
-
-    const mainCommands =
-      this.wrapWithColor("Main Commands:\n", "#00ffff") +
-      this.wrapWithColor("• help", "#98fb98") +
-      "       " +
-      this.wrapWithColor("Show this help message\n", "#ffffff") +
-      this.wrapWithColor("• about", "#98fb98") +
-      "      " +
-      this.wrapWithColor("Display my professional summary\n", "#ffffff") +
-      this.wrapWithColor("• skills", "#98fb98") +
-      "     " +
-      this.wrapWithColor("View my technical expertise\n", "#ffffff") +
-      this.wrapWithColor("• experience", "#98fb98") +
-      " " +
-      this.wrapWithColor("Show my work history\n", "#ffffff") +
-      this.wrapWithColor("• education", "#98fb98") +
-      "  " +
-      this.wrapWithColor("View my educational background\n", "#ffffff") +
-      this.wrapWithColor("• contact", "#98fb98") +
-      "    " +
-      this.wrapWithColor("Get my contact information\n", "#ffffff") +
-      this.wrapWithColor("• clear", "#98fb98") +
-      "      " +
-      this.wrapWithColor("Clear the terminal screen\n", "#ffffff");
-
-    const utilityCommands =
-      "\n" +
-      this.wrapWithColor("Utility Commands:\n", "#00ffff") +
-      this.wrapWithColor("• projects", "#98fb98") +
-      "   " +
-      this.wrapWithColor("View my project showcase\n", "#ffffff") +
-      this.wrapWithColor("• skills-visual", "#98fb98") +
-      " " +
-      this.wrapWithColor("Show skills visualization\n", "#ffffff") +
-      this.wrapWithColor("• game", "#98fb98") +
-      "      " +
-      this.wrapWithColor("Play a mini-game\n", "#ffffff") +
-      this.wrapWithColor("• matrix", "#98fb98") +
-      "    " +
-      this.wrapWithColor("Start Matrix digital rain effect\n", "#ffffff") +
-      this.wrapWithColor("• weather", "#98fb98") +
-      "   " +
-      this.wrapWithColor("Check weather for a location\n", "#ffffff") +
-      this.wrapWithColor("• calc", "#98fb98") +
-      "      " +
-      this.wrapWithColor("Calculate mathematical expressions\n", "#ffffff") +
-      this.wrapWithColor("• pdf", "#98fb98") +
-      "       " +
-      this.wrapWithColor("Download resume as PDF\n", "#ffffff") +
-      this.wrapWithColor("• linkedin-cover", "#98fb98") +
-      " " +
-      this.wrapWithColor("Generate LinkedIn cover image\n", "#ffffff");
-
-    const shortcuts =
-      "\n" +
-      this.wrapWithColor("Shortcuts:\n", "#666666") +
-      this.wrapWithColor("• ", "#666666") +
-      this.wrapWithColor("↑/↓", "#666666") +
-      "         " +
-      this.wrapWithColor("Navigate command history\n", "#444444") +
-      this.wrapWithColor("• ", "#666666") +
-      this.wrapWithColor("Tab", "#666666") +
-      "         " +
-      this.wrapWithColor("Auto-complete commands\n", "#444444") +
-      this.wrapWithColor("• ", "#666666") +
-      this.wrapWithColor("Ctrl+L", "#666666") +
-      "      " +
-      this.wrapWithColor("Clear the screen\n", "#444444") +
-      this.wrapWithColor("• ", "#666666") +
-      this.wrapWithColor("Ctrl+Shift+H", "#666666") +
-      " " +
-      this.wrapWithColor("Split horizontally\n", "#444444") +
-      this.wrapWithColor("• ", "#666666") +
-      this.wrapWithColor("Ctrl+Shift+V", "#666666") +
-      " " +
-      this.wrapWithColor("Split vertically", "#444444");
-
-    const help = title + mainCommands + utilityCommands + shortcuts;
-
-    const helpDiv = document.createElement("div");
-    helpDiv.innerHTML = help;
-    outputElement.appendChild(helpDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  showAbout(outputElement = this.output) {
-    const about = `<span style="color: #ff8c00; font-weight: bold;">✨ About Me</span>
-
-${this.wrapWithColor(
-  "┌─────────────────────────────────────────────────────────┐",
-  "#ff8c00"
-)}
-${this.wrapWithColor("│", "#ff8c00")} ${this.wrapWithColor(
-      "Senior software engineer with more than 10 years of",
-      "#ffffff"
-    )}
-${this.wrapWithColor("│", "#ff8c00")} ${this.wrapWithColor(
-      "programming experience.",
-      "#ffffff"
-    )}
-${this.wrapWithColor(
-  "└─────────────────────────────────────────────────────────┘",
-  "#ff8c00"
-)}
-
-${this.wrapWithColor("⚡ Experience", "#ff8c00")}
-${this.wrapWithColor(
-  "   Building scalable and efficient software solutions using",
-  "#ffffff"
-)}
-${this.wrapWithColor("   React, JavaScript, and Google Cloud", "#ff8c00")}
-
-${this.wrapWithColor("⚡ Passion", "#ff8c00")}
-${this.wrapWithColor(
-  "   Transforming innovative ideas into high-quality applications",
-  "#ffffff"
-)}
-${this.wrapWithColor(
-  "   with elegant and efficient implementations",
-  "#ffffff"
-)}
-
-${this.wrapWithColor("⚡ Strengths", "#ff8c00")}
-${this.wrapWithColor(
-  "   Strong team player with expertise in designing robust,",
-  "#ffffff"
-)}
-${this.wrapWithColor("   high-performance systems", "#ffffff")}
-
-${this.wrapWithColor(
-  "╭───────────────────────────────────────────────────────╮",
-  "#ff8c00"
-)}
-${this.wrapWithColor("│", "#ff8c00")} ${this.wrapWithColor(
-      "Ready to bring your innovative ideas to life!",
-      "#ffffff"
-    )} ${this.wrapWithColor("│", "#ff8c00")}
-${this.wrapWithColor(
-  "╰───────────────────────────────────────────────────────╯",
-  "#ff8c00"
-)}`;
-
-    const aboutDiv = document.createElement("div");
-    aboutDiv.innerHTML = about;
-    outputElement.appendChild(aboutDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  // Helper method to wrap text with color
-  wrapWithColor(text, color) {
-    return `<span style="color: ${color}">${text}</span>`;
-  }
-
-  // Typewriter effect for terminal outputs
-  typeText(element, text, speed = 30) {
-    if (!element || !text) return Promise.resolve();
-
-    return new Promise((resolve) => {
-      let index = 0;
-      element.textContent = "";
-      element.style.display = "inline-block";
-
-      const interval = setInterval(() => {
-        if (index < text.length) {
-          element.textContent += text.charAt(index);
-          index++;
-        } else {
-          clearInterval(interval);
-          resolve();
-        }
-      }, speed);
-    });
-  }
-
-  // Apply typewriter effect to HTML content
-  async typeHTML(element, html, speed = 30) {
-    if (!element || !html) return Promise.resolve();
-
-    // Create a temporary div to hold the HTML
-    const temp = document.createElement("div");
-    temp.innerHTML = html;
-
-    // Get text nodes and elements in order
-    const walker = document.createTreeWalker(
-      temp,
-      NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT,
-      null,
-      false
-    );
-
-    const nodes = [];
-    let currentNode;
-    while ((currentNode = walker.nextNode())) {
-      nodes.push(currentNode);
-    }
-
-    // Clear the target element
-    element.innerHTML = "";
-
-    // Process each node
-    for (const node of nodes) {
-      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
-        const span = document.createElement("span");
-        element.appendChild(span);
-        await this.typeText(span, node.textContent, speed);
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const clone = node.cloneNode(false);
-        element.appendChild(clone);
-
-        // If this is a style or has no children, just add it as is
-        if (node.tagName === "STYLE" || !node.hasChildNodes()) {
-          clone.innerHTML = node.innerHTML;
-        }
-      }
-    }
-
-    return Promise.resolve();
-  }
-
-  showExperience(outputElement = this.output) {
-    const experience = `<span style="color: #ffff00; font-weight: bold;">💼 Professional Experience</span>
-
-<span style="color: #00ffff;">UNICEPTA | Senior Software Engineer</span>
-${this.wrapWithColor(
-  "Jul 2020 - Present | Cologne, Germany | 450+ employees",
-  "#ffffff"
-)}
-${this.wrapWithColor(
-  "Visionary, AI-powered Media & Data Intelligence Solutions",
-  "#98fb98"
-)}
-
-• ${this.wrapWithColor("Part of Core team", "#ffa07a")} - ${this.wrapWithColor(
-      "Architect and part of every decision.",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor(
-      "Microservices engineer",
-      "#ffa07a"
-    )} - ${this.wrapWithColor(
-      "Designed and build services for distributed system",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("Pipeline engineer", "#ffa07a")} - ${this.wrapWithColor(
-      "Google cloud engineer for data pipeline",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("Fullstack engineer", "#ffa07a")} - ${this.wrapWithColor(
-      "Wrote and reviewed code for front/back/cloud.",
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("Technologies used:", "#00ffff")} ${this.wrapWithColor(
-      "Typescript, React, NodeJs, Poetry, PyTest, ReactJS, Jest, Cypress, ES6, ElasticSearch, Google Cloud, JIRA, Firebase, Kubernetes, Data Flow",
-      "#87cefa"
-    )}
-
-<span style="color: #00ffff;">RITECH SOLUTIONS | Senior Software Engineer</span>
-${this.wrapWithColor(
-  "Jul 2018 – Jul 2020 | Tirana, Albania | 100-150 employees",
-  "#ffffff"
-)}
-
-• ${this.wrapWithColor("Part of Core team", "#ffa07a")} - ${this.wrapWithColor(
-      "Team that leads company tech decisions",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("Tech interviewer", "#ffa07a")} - ${this.wrapWithColor(
-      "Interview potential candidates.",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("Microsoft project", "#ffa07a")} - ${this.wrapWithColor(
-      "IOT marketing project in every Microsoft store.",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("Fullstack engineer", "#ffa07a")} - ${this.wrapWithColor(
-      "Wrote and reviewed code for big projects.",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor(
-      "AppriseMobile Tech Lead",
-      "#ffa07a"
-    )} - ${this.wrapWithColor(
-      "CRM for Toyota and corporates in USA",
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("Technologies used:", "#00ffff")} ${this.wrapWithColor(
-      "JavaScript, Python, pandas, NodeJs, ReactJS, Chai, Sinon, Mocha, ES6, ElasticSearch, Redis, Nginx, Gulp, JIRA, Docker, Azure, AWS, MongoDB",
-      "#87cefa"
-    )}
-
-<span style="color: #00ffff;">GUTENBERG TECHNOLOGY | Software Engineering</span>
-${this.wrapWithColor(
-  "Feb 2017 – Aug 2018 | Paris, France | 50-100 employees",
-  "#ffffff"
-)}
-
-• ${this.wrapWithColor(
-      "Fullstack developer",
-      "#ffa07a"
-    )} - ${this.wrapWithColor(
-      "Frontend and backend (real-time publisher platform) used by National Geographics, IUBH, Fujitsu",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("MEFIO developer", "#ffa07a")} - ${this.wrapWithColor(
-      "Highly available publisher platform",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor(
-      "Webreader developer",
-      "#ffa07a"
-    )} - ${this.wrapWithColor(
-      "reader platform, e-Learning platform",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("SaaS developer", "#ffa07a")} - ${this.wrapWithColor(
-      "Integrated strategy to migrate from manual sales to SaaS",
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("Technologies used:", "#00ffff")} ${this.wrapWithColor(
-      "Python, ES6, ElasticSearch, Redis, Nginx, npm, Gulp, JIRA, Docker, AWS S3, RethinkDB, ReactJS, NodeJS, AngularJS, JavaScript",
-      "#87cefa"
-    )}
-
-<span style="color: #00ffff;">GROUP OF COMPANIES | Software Engineer</span>
-${this.wrapWithColor(
-  "Mar 2015 – Feb 2017 | Tirana, Albania | 5-30 employees",
-  "#ffffff"
-)}
-
-• ${this.wrapWithColor("Software developer", "#ffa07a")} - ${this.wrapWithColor(
-      "Developed web and native projects",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("Bar management app", "#ffa07a")} - ${this.wrapWithColor(
-      "Developed app for bar/restaurant management.",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor(
-      "Bank system optimisation",
-      "#ffa07a"
-    )} - ${this.wrapWithColor(
-      "Optimised aggregation from 11h to 1h",
-      "#ffffff"
-    )}
-• ${this.wrapWithColor("UKD developer", "#ffa07a")} - ${this.wrapWithColor(
-      "Water supply billing process for Albania, Government project",
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("Technologies used:", "#00ffff")} ${this.wrapWithColor(
-      "Typescript, Python, Gulp, Docker, MongoDB, ReactJS, NodeJs, AngularJS, JavaScript, Java",
-      "#87cefa"
-    )}`;
-
-    const experienceDiv = document.createElement("div");
-    experienceDiv.innerHTML = experience;
-    outputElement.appendChild(experienceDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  showEducation(outputElement = this.output) {
-    const education = `<span style="color: #ff8c00; font-weight: bold;">🎓 Education</span>
-
-${this.wrapWithColor(
-  "┌──────────────────────────────────────────────────┐",
-  "#ff8c00"
-)}
-${this.wrapWithColor("│", "#ff8c00")}${this.wrapWithColor(
-      " Bachelor of Computer Science ",
-      "#ffffff"
-    )}${this.wrapWithColor("│", "#ff8c00")}
-${this.wrapWithColor(
-  "└──────────────────────────────────────────────────┘",
-  "#ff8c00"
-)}
-
-${this.wrapWithColor("🏛️ Institution:", "#ff8c00")} ${this.wrapWithColor(
-      "University of Tirana",
-      "#ffffff"
-    )}
-${this.wrapWithColor("📅 Duration:", "#ff8c00")}    ${this.wrapWithColor(
-      "2013 - 2016",
-      "#ffffff"
-    )}
-${this.wrapWithColor("📍 Location:", "#ff8c00")}    ${this.wrapWithColor(
-      "Tirana, Albania",
-      "#ffffff"
-    )}
-
-${this.wrapWithColor(
-  "╭──────────────────────────────────────────────────╮",
-  "#ff8c00"
-)}
-${this.wrapWithColor("│", "#ff8c00")}${this.wrapWithColor(
-      " Foundation of my software engineering journey ",
-      "#ffffff"
-    )}${this.wrapWithColor("│", "#ff8c00")}
-${this.wrapWithColor(
-  "╰──────────────────────────────────────────────────╯",
-  "#ff8c00"
-)}`;
-
-    const educationDiv = document.createElement("div");
-    educationDiv.innerHTML = education;
-    outputElement.appendChild(educationDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  showSkills(outputElement = this.output) {
-    const skills = `<span style="color: #ffff00; font-weight: bold;">🛠️ PROGRAMMING</span>
-
-• ${this.wrapWithColor("Typescript", "#ffffff")}
-• ${this.wrapWithColor("Python", "#ffffff")}
-• ${this.wrapWithColor("Javascript", "#ffffff")}
-• ${this.wrapWithColor("Node", "#ffffff")}
-• ${this.wrapWithColor("React", "#ffffff")}
-• ${this.wrapWithColor("Angular", "#ffffff")}
-• ${this.wrapWithColor("Google Cloud", "#ffffff")}
-• ${this.wrapWithColor("AWS", "#ffffff")}
-• ${this.wrapWithColor("Azure", "#ffffff")}
-• ${this.wrapWithColor("Docker", "#ffffff")}
-• ${this.wrapWithColor("Terraform", "#ffffff")}
-• ${this.wrapWithColor("Kubernetes", "#ffffff")}
-• ${this.wrapWithColor("Java", "#ffffff")}
-• ${this.wrapWithColor("Kotlin", "#ffffff")}
-• ${this.wrapWithColor("MongoDB", "#ffffff")}
-• ${this.wrapWithColor("RethinkDB", "#ffffff")}
-• ${this.wrapWithColor("Jest", "#ffffff")}
-• ${this.wrapWithColor("ElasticSearch", "#ffffff")}
-• ${this.wrapWithColor("GraphQL", "#ffffff")}
-• ${this.wrapWithColor("Express", "#ffffff")}
-• ${this.wrapWithColor("Redis", "#ffffff")}
-• ${this.wrapWithColor("SQL", "#ffffff")}
-• ${this.wrapWithColor("HTML", "#ffffff")}
-• ${this.wrapWithColor("CSS", "#ffffff")}`;
-
-    const skillsDiv = document.createElement("div");
-    skillsDiv.innerHTML = skills;
-    outputElement.appendChild(skillsDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
-  showContact(outputElement = this.output) {
-    const contact = `<span style="color: #ff8c00; font-weight: bold;">📫 Contact Information</span>
-
-${this.wrapWithColor("┌────────────────────────────────────────┐", "#ff8c00")}
-${this.wrapWithColor("│", "#ff8c00")} ${this.wrapWithColor(
-      "Let's connect and create something great!",
-      "#ffffff"
-    )} ${this.wrapWithColor("│", "#ff8c00")}
-${this.wrapWithColor("└────────────────────────────────────────┘", "#ff8c00")}
-
-${this.wrapWithColor("✉", "#ff8c00")}  ${this.wrapWithColor(
-      "Email:",
-      "#ff8c00"
-    )} ${this.wrapWithColor(
-      '<a href="mailto:marjoballabani@gmail.com" style="color: #ffffff; text-decoration: none;">marjoballabani@gmail.com</a>',
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("🌐", "#ff8c00")}  ${this.wrapWithColor(
-      "Website:",
-      "#ff8c00"
-    )} ${this.wrapWithColor(
-      '<a href="https://marjoballabani.me" target="_blank" style="color: #ffffff; text-decoration: none;">marjoballabani.me</a>',
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("⚡", "#ff8c00")}  ${this.wrapWithColor(
-      "Github:",
-      "#ff8c00"
-    )} ${this.wrapWithColor(
-      '<a href="https://github.com/marjoballabani" target="_blank" style="color: #ffffff; text-decoration: none;">github.com/marjoballabani</a>',
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("💼", "#ff8c00")}  ${this.wrapWithColor(
-      "LinkedIn:",
-      "#ff8c00"
-    )} ${this.wrapWithColor(
-      '<a href="https://linkedin.com/in/marjo-ballabani" target="_blank" style="color: #ffffff; text-decoration: none;">linkedin.com/in/marjo-ballabani</a>',
-      "#ffffff"
-    )}
-
-${this.wrapWithColor("╭────────────────────────────────────────╮", "#ff8c00")}
-${this.wrapWithColor("│", "#ff8c00")} ${this.wrapWithColor(
-      "Feel free to reach out for opportunities!",
-      "#ffffff"
-    )} ${this.wrapWithColor("│", "#ff8c00")}
-${this.wrapWithColor("╰────────────────────────────────────────╯", "#ff8c00")}`;
-
-    const contactDiv = document.createElement("div");
-    contactDiv.innerHTML = contact;
-    outputElement.appendChild(contactDiv);
-    this.scrollToBottom(outputElement.closest(".terminal-content"));
-  }
-
   closeSplit(terminalContent) {
     const container = terminalContent.parentElement;
     const input = terminalContent.querySelector("input");
@@ -1838,7 +813,7 @@ ${this.wrapWithColor("╰──────────────────�
 
     // Add terminal title
     const terminalTitle = document.createElement("div");
-    terminalTitle.textContent = "marjo@ballabani: ~/interactive-resume";
+    terminalTitle.textContent = "hemant@kumar: ~/interactive-resume";
     terminalTitle.style.color = "#f8f8f2";
     terminalTitle.style.fontSize = "12px";
     terminalTitle.style.fontFamily = "'Fira Code', monospace";
@@ -1895,7 +870,7 @@ ${this.wrapWithColor("╰──────────────────�
 
     // Add role
     const role = document.createElement("div");
-    role.textContent = "Software Engineer • Cloud Architect • Tech Lead";
+    role.textContent = "AI Developer • Full-Stack • Builder";
     role.style.color = "#666666";
     role.style.fontSize = "10px";
     role.style.fontFamily = "'Fira Code', monospace";
@@ -2027,7 +1002,7 @@ ${this.wrapWithColor("╰──────────────────�
     urlContainer.style.textAlign = "center";
 
     const url = document.createElement("div");
-    url.textContent = "marjoballabani.me";
+    url.textContent = "hemantkumar822.github.io";
     url.style.color = "#87cefa";
     url.style.fontSize = "12px";
     url.style.fontFamily = "'Fira Code', monospace";
@@ -2052,6 +1027,366 @@ ${this.wrapWithColor("╰──────────────────�
 
     // Scroll to make sure the cover is visible
     this.scrollToBottom(outputElement.closest(".terminal-content"));
+  }
+
+  // ─── Utility helpers ─────────────────────────────────────────────────────
+
+  scrollToBottom(container) {
+    if (container) container.scrollTop = container.scrollHeight;
+  }
+
+  wrapWithColor(text, color) {
+    return `<span style="color:${color}">${text}</span>`;
+  }
+
+  printToOutput(outputElement, content, type = "") {
+    const line = document.createElement("div");
+    line.className = `output-line ${type}`;
+    if (type === "error") line.style.color = "#ff5555";
+    else if (type === "info") line.style.color = "#8be9fd";
+    else if (type === "success") line.style.color = "#50fa7b";
+    line.innerHTML = content;
+    outputElement.appendChild(line);
+    this.scrollToBottom(outputElement.closest(".terminal-content"));
+  }
+
+  getOutputElement() {
+    const content = this.terminals[this.activeTerminal]?.input?.closest(".terminal-content");
+    return content ? content.querySelector("[id^='output']") || content.querySelector(".output") : null;
+  }
+
+  // ─── Initialisation ───────────────────────────────────────────────────────
+
+  init() {
+    const outputEl = document.getElementById("output");
+    if (!outputEl) return;
+
+    const banner = `<pre style="color:#d4843e;font-size:11px;line-height:1.1;margin:0">
+██╗  ██╗███████╗███╗   ███╗ █████╗ ███╗   ██╗████████╗
+██║  ██║██╔════╝████╗ ████║██╔══██╗████╗  ██║╚══██╔══╝
+███████║█████╗  ██╔████╔██║███████║██╔██╗ ██║   ██║
+██╔══██║██╔══╝  ██║╚██╔╝██║██╔══██║██║╚██╗██║   ██║
+██║  ██║███████╗██║ ╚═╝ ██║██║  ██║██║ ╚████║   ██║
+╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝</pre>`;
+    this.printToOutput(outputEl, banner);
+    this.printToOutput(outputEl, `<span style="color:#8be9fd">  AI Developer • Full-Stack • Builder</span>`);
+    this.printToOutput(outputEl, `<span style="color:#6272a4">  ─────────────────────────────────────────────</span>`);
+    this.printToOutput(outputEl, `<span style="color:#f8f8f2">  Welcome! Type </span><span style="color:#50fa7b">help</span><span style="color:#f8f8f2"> to see available commands.</span>`);
+    this.printToOutput(outputEl, "");
+    this.applyTheme(this.currentTheme);
+  }
+
+  applyTheme(theme) {
+    const terminal = document.querySelector(".terminal");
+    if (terminal) {
+      terminal.className = `terminal theme-${theme}`;
+    }
+  }
+
+  // ─── Event listeners ──────────────────────────────────────────────────────
+
+  setupEventListeners() {
+    // Keyboard input on main input
+    if (this.input) {
+      this.input.addEventListener("keydown", (e) => this.handleKeyDown(e, 0));
+    }
+
+    // Theme toggle button
+    if (this.themeToggle) {
+      this.themeToggle.addEventListener("click", () => {
+        if (this.themeModal) this.showModal(this.themeModal);
+      });
+    }
+
+    // Theme modal options
+    document.querySelectorAll(".theme-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.handleThemeChange(btn.dataset.theme || btn.textContent.toLowerCase().trim());
+      });
+    });
+
+    // Close modals on backdrop click
+    document.querySelectorAll(".modal-overlay").forEach((overlay) => {
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) this.closeModal(overlay);
+      });
+    });
+
+    // Close modal buttons
+    document.querySelectorAll(".modal-close").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const modal = btn.closest(".modal-overlay");
+        if (modal) this.closeModal(modal);
+      });
+    });
+
+    // Context menu
+    document.addEventListener("contextmenu", (e) => {
+      if (this.terminal && this.terminal.contains(e.target)) {
+        e.preventDefault();
+        if (this.contextMenu) {
+          this.contextMenu.style.left = e.pageX + "px";
+          this.contextMenu.style.top = e.pageY + "px";
+          this.contextMenu.classList.add("active");
+        }
+      }
+    });
+
+    document.addEventListener("click", () => {
+      if (this.contextMenu) this.contextMenu.classList.remove("active");
+    });
+
+    // Focus input when clicking terminal
+    if (this.terminal) {
+      this.terminal.addEventListener("click", () => {
+        const active = this.terminals[this.activeTerminal];
+        if (active) active.input.focus();
+      });
+    }
+  }
+
+  handleKeyDown(e, terminalIndex) {
+    const termData = this.terminals[terminalIndex];
+    if (!termData) return;
+
+    if (e.key === "Enter") {
+      const cmd = termData.input.value.trim();
+      if (cmd) {
+        termData.history.unshift(cmd);
+        termData.historyIndex = -1;
+        const outputEl = termData.input.closest(".terminal-content")?.querySelector("[id^='output']")
+          || termData.input.closest(".terminal-content")?.querySelector(".output");
+        if (outputEl) {
+          this.printToOutput(outputEl, `<span style="color:#87af87">➜</span>  <span style="color:#f8f8f2">${this.escapeHtml(cmd)}</span>`);
+          this.processCommand(cmd.toLowerCase(), outputEl);
+        }
+      }
+      termData.input.value = "";
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (termData.historyIndex < termData.history.length - 1) {
+        termData.historyIndex++;
+        termData.input.value = termData.history[termData.historyIndex];
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (termData.historyIndex > 0) {
+        termData.historyIndex--;
+        termData.input.value = termData.history[termData.historyIndex];
+      } else {
+        termData.historyIndex = -1;
+        termData.input.value = "";
+      }
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      const commands = ["about","experience","education","skills","contact","help","clear","game","matrix","stop-matrix","weather","calc","linkedin-cover","theme","projects","split"];
+      const partial = termData.input.value.toLowerCase();
+      const match = commands.find((c) => c.startsWith(partial));
+      if (match) termData.input.value = match;
+    }
+  }
+
+  escapeHtml(str) {
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  // ─── Command processor ────────────────────────────────────────────────────
+
+  processCommand(cmd, outputEl) {
+    const parts = cmd.split(" ");
+    const base = parts[0];
+    const args = parts.slice(1).join(" ");
+
+    switch (base) {
+      case "about":        this.showAbout(outputEl); break;
+      case "experience":   this.showExperience(outputEl); break;
+      case "education":    this.showEducation(outputEl); break;
+      case "skills":       this.showSkills(outputEl); break;
+      case "contact":      this.showContact(outputEl); break;
+      case "projects":     this.showProjects(); break;
+      case "clear":        this.clearTerminal(outputEl); break;
+      case "game":         this.initGame(); break;
+      case "matrix":       this.startMatrixEffect(outputEl); break;
+      case "stop-matrix":  this.stopMatrixEffect(); break;
+      case "weather":      this.showWeather(args, outputEl); break;
+      case "calc":         this.calculate(args, outputEl); break;
+      case "linkedin-cover": this.generateLinkedInCover(outputEl); break;
+      case "theme":        if (this.themeModal) this.showModal(this.themeModal); break;
+      case "split":        this.splitTerminal(); break;
+      case "help":         this.showHelp(outputEl); break;
+      default:
+        this.printToOutput(outputEl,
+          `Command not found: <span style="color:#ff5555">${this.escapeHtml(base)}</span>. Type <span style="color:#50fa7b">help</span> for available commands.`,
+          "error");
+    }
+  }
+
+  clearTerminal(outputEl) {
+    if (outputEl) outputEl.innerHTML = "";
+  }
+
+  splitTerminal() {
+    const container = document.querySelector(".terminal-container");
+    if (!container) return;
+    const newContent = document.createElement("div");
+    newContent.className = "terminal-content";
+    const newOutput = document.createElement("div");
+    newOutput.id = `output-${Date.now()}`;
+    newOutput.className = "output";
+    newContent.appendChild(newOutput);
+
+    const inputRow = document.createElement("div");
+    inputRow.className = "input-line";
+    inputRow.innerHTML = `<span class="prompt">➜ </span>`;
+    const newInput = document.createElement("input");
+    newInput.type = "text";
+    newInput.className = "command-input";
+    newInput.setAttribute("autocomplete","off");
+    newInput.setAttribute("spellcheck","false");
+    inputRow.appendChild(newInput);
+    newContent.appendChild(inputRow);
+    container.appendChild(newContent);
+
+    const newIndex = this.terminals.length;
+    this.terminals.push({ input: newInput, history: [], historyIndex: -1 });
+    newInput.addEventListener("keydown", (e) => this.handleKeyDown(e, newIndex));
+    newInput.focus();
+    this.activeTerminal = newIndex;
+
+    const closeBtn = document.createElement("button");
+    closeBtn.className = "split-close-btn";
+    closeBtn.textContent = "✕";
+    closeBtn.addEventListener("click", () => this.closeSplit(newContent));
+    newContent.prepend(closeBtn);
+  }
+
+  // ─── Help ────────────────────────────────────────────────────────────────
+
+  showHelp(outputEl) {
+    const lines = [
+      `<span style="color:#ffff00;font-weight:bold">🚀 Available Commands</span>`,
+      "",
+      `<span style="color:#00ffff">── Info ──────────────────────────────</span>`,
+      `  <span style="color:#50fa7b">about</span>          Professional summary`,
+      `  <span style="color:#50fa7b">experience</span>     Work & community history`,
+      `  <span style="color:#50fa7b">education</span>      Academic background`,
+      `  <span style="color:#50fa7b">skills</span>         Technical skills`,
+      `  <span style="color:#50fa7b">contact</span>        Get in touch`,
+      "",
+      `<span style="color:#00ffff">── Tools ─────────────────────────────</span>`,
+      `  <span style="color:#50fa7b">weather [city]</span>  Live weather`,
+      `  <span style="color:#50fa7b">calc [expr]</span>     Calculator`,
+      `  <span style="color:#50fa7b">matrix</span>          Matrix rain effect`,
+      `  <span style="color:#50fa7b">stop-matrix</span>     Stop matrix`,
+      `  <span style="color:#50fa7b">game</span>            Snake game`,
+      `  <span style="color:#50fa7b">linkedin-cover</span>  Generate LinkedIn cover`,
+      `  <span style="color:#50fa7b">theme</span>           Change terminal theme`,
+      `  <span style="color:#50fa7b">split</span>           Split terminal`,
+      `  <span style="color:#50fa7b">clear</span>           Clear screen`,
+      "",
+    ];
+    lines.forEach((l) => this.printToOutput(outputEl, l));
+  }
+
+  // ─── Content commands ─────────────────────────────────────────────────────
+
+  showAbout(outputEl) {
+    const lines = [
+      `<span style="color:#ffff00;font-weight:bold">── About Me ───────────────────────────</span>`,
+      "",
+      `  <span style="color:#8be9fd">Name     </span>  Hemant Kumar`,
+      `  <span style="color:#8be9fd">Role     </span>  AI & Software Developer`,
+      `  <span style="color:#8be9fd">Location </span>  Jaipur, Rajasthan, India`,
+      `  <span style="color:#8be9fd">University</span> JECRC University`,
+      `  <span style="color:#8be9fd">Degree   </span>  B.Tech CSE (AI & Data Science), 2025–2029`,
+      "",
+      `  I'm a developer passionate about machine learning,`,
+      `  full-stack development, and building real-world software.`,
+      `  I love turning ideas into products and exploring what's`,
+      `  possible at the intersection of AI and software engineering.`,
+      "",
+      `  Leading the AI/ML community at JECRC and collaborating`,
+      `  on impactful tech projects like EWTCS.`,
+      "",
+    ];
+    lines.forEach((l) => this.printToOutput(outputEl, l));
+  }
+
+  showExperience(outputEl) {
+    const lines = [
+      `<span style="color:#ffff00;font-weight:bold">── Experience ─────────────────────────</span>`,
+      "",
+      `  <span style="color:#50fa7b;font-weight:bold">JECRC AI/ML Community</span>`,
+      `  <span style="color:#8be9fd">Role      </span>  Community Lead`,
+      `  <span style="color:#8be9fd">Period    </span>  2025 – Present`,
+      `  <span style="color:#8be9fd">Location  </span>  Jaipur, India`,
+      `    • Organising workshops, seminars & hackathons on AI/ML`,
+      `    • Mentoring peers in machine learning concepts`,
+      `    • Building a collaborative learning community at JECRC`,
+      "",
+      `  <span style="color:#50fa7b;font-weight:bold">EWTCS – Hospital Management System</span>`,
+      `  <span style="color:#8be9fd">Role      </span>  Collaborator (College Project)`,
+      `  <span style="color:#8be9fd">Period    </span>  2025 – Present`,
+      `  <span style="color:#8be9fd">Tech      </span>  Full-stack web, Java, MySQL`,
+      `    • Collaborated on a hospital & medical college management system`,
+      `    • Contributed to core modules and system architecture`,
+      "",
+    ];
+    lines.forEach((l) => this.printToOutput(outputEl, l));
+  }
+
+  showEducation(outputEl) {
+    const lines = [
+      `<span style="color:#ffff00;font-weight:bold">── Education ──────────────────────────</span>`,
+      "",
+      `  <span style="color:#50fa7b;font-weight:bold">JECRC University, Jaipur</span>`,
+      `  <span style="color:#8be9fd">Degree  </span>  B.Tech – CSE (AI & Data Science)`,
+      `  <span style="color:#8be9fd">Period  </span>  2025 – 2029`,
+      `  <span style="color:#8be9fd">Stream  </span>  Artificial Intelligence & Data Science`,
+      `    • Specialising in machine learning, deep learning & data science`,
+      `    • Active in the AI/ML Community as a lead`,
+      "",
+    ];
+    lines.forEach((l) => this.printToOutput(outputEl, l));
+  }
+
+  showSkills(outputEl) {
+    const lines = [
+      `<span style="color:#ffff00;font-weight:bold">── Skills ──────────────────────────────</span>`,
+      "",
+      `  <span style="color:#00ffff">AI / ML</span>`,
+      `    Python  TensorFlow  PyTorch  scikit-learn  NumPy  Pandas`,
+      "",
+      `  <span style="color:#00ffff">Frontend</span>`,
+      `    React.js  HTML5  CSS3  JavaScript  TypeScript  Bootstrap`,
+      "",
+      `  <span style="color:#00ffff">Backend</span>`,
+      `    Node.js  Express  REST APIs  Java`,
+      "",
+      `  <span style="color:#00ffff">Databases</span>`,
+      `    MongoDB  MySQL  PostgreSQL`,
+      "",
+      `  <span style="color:#00ffff">Cloud & DevOps</span>`,
+      `    Google Cloud  Docker  Git  GitHub`,
+      "",
+    ];
+    lines.forEach((l) => this.printToOutput(outputEl, l));
+  }
+
+  showContact(outputEl) {
+    const lines = [
+      `<span style="color:#ffff00;font-weight:bold">── Contact ─────────────────────────────</span>`,
+      "",
+      `  <span style="color:#8be9fd">Email    </span>  <span style="color:#50fa7b">hk998035@gmail.com</span>`,
+      `  <span style="color:#8be9fd">GitHub   </span>  <span style="color:#50fa7b">github.com/HemantKumar822</span>`,
+      `  <span style="color:#8be9fd">LinkedIn </span>  <span style="color:#50fa7b">linkedin.com/in/hemant-kumar-b8a1243b1</span>`,
+      `  <span style="color:#8be9fd">Instagram</span>  <span style="color:#50fa7b">instagram.com/hemant._.ai</span>`,
+      "",
+      `  Feel free to reach out – I'm always open to`,
+      `  collaborations, projects, and opportunities!`,
+      "",
+    ];
+    lines.forEach((l) => this.printToOutput(outputEl, l));
   }
 }
 
