@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -89,7 +89,7 @@
       "sameAs": [
         "https://github.com/HemantKumar822",
         "https://linkedin.com/in/hemant-kumar-b8a1243b1",
-        "https://instagram.com/hemant._.ai"
+        "https://instagram.com/hemant.curious"
       ]
     }
     </script>
@@ -181,7 +181,7 @@
     <section class="hero" id="hero">
         <div class="hero-content">
             <div class="hero-left">
-                <p class="hero-greeting" id="hero-greeting">Hi there! 👋</p>
+                <p class="hero-greeting" id="hero-greeting">Hi there! ðŸ‘‹</p>
                 <h1 class="hero-name" data-text="I'm Hemant Kumar.">I'm Hemant Kumar.</h1>
                 <p class="hero-description">
                     Based in Jaipur, India, I'm an AI & Software Developer. I love building intelligent systems, exploring machine learning, and shipping real-world software. I'm passionate about AI/ML, full-stack development, and turning ideas into products.
@@ -193,7 +193,7 @@
                     <a href="https://linkedin.com/in/hemant-kumar-b8a1243b1" target="_blank" class="social-btn">
                         <i class="fab fa-linkedin"></i>
                     </a>
-                    <a href="https://instagram.com/hemant._.ai" target="_blank" class="social-btn">
+                    <a href="https://instagram.com/hemant.curious" target="_blank" class="social-btn">
                         <i class="fab fa-instagram"></i>
                     </a>
                 </div>
@@ -298,7 +298,7 @@
                     and helping fellow students dive into <span class="highlight highlight-pink">emerging technologies</span>.
                 </p>
                 <p class="text">
-                    I believe in <span class="highlight highlight-yellow">learning by building</span> — every project is a chance to grow.
+                    I believe in <span class="highlight highlight-yellow">learning by building</span> â€” every project is a chance to grow.
                     I bring <span class="highlight highlight-green">curiosity, energy, and clean code</span> to everything I create.
                 </p>
             </div>
@@ -619,7 +619,7 @@
                         <i class="fab fa-github"></i>
                         <span>GitHub</span>
                     </a>
-                    <a href="https://instagram.com/hemant._.ai" target="_blank" class="contact-card">
+                    <a href="https://instagram.com/hemant.curious" target="_blank" class="contact-card">
                         <i class="fab fa-instagram"></i>
                         <span>Instagram</span>
                     </a>
@@ -647,7 +647,7 @@
                         <a href="https://linkedin.com/in/hemant-kumar-b8a1243b1" target="_blank" title="LinkedIn">
                             <i class="fab fa-linkedin"></i>
                         </a>
-                        <a href="https://instagram.com/hemant._.ai" target="_blank" title="Instagram">
+                        <a href="https://instagram.com/hemant.curious" target="_blank" title="Instagram">
                             <i class="fab fa-instagram"></i>
                         </a>
                         <a href="mailto:hk998035@gmail.com" title="Email">
@@ -656,7 +656,7 @@
                     </div>
                 </div>
                 <div class="footer-bottom-compact">
-                    <span>© 2026 Hemant Kumar</span>
+                    <span>Â© 2026 Hemant Kumar</span>
                     <a href="terminal.html" class="footer-terminal-link-compact">
                         <i class="fas fa-terminal"></i> Terminal
                     </a>
@@ -1105,7 +1105,7 @@
 
         // Matrix Typing Effect for Hero Greeting
         const greetingElement = document.getElementById('hero-greeting');
-        const finalText = 'Hi there! 👋';
+        const finalText = 'Hi there! ðŸ‘‹';
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
 
         function matrixTypingEffect() {
@@ -1117,7 +1117,7 @@
                         if (index < iterations) {
                             return finalText[index];
                         }
-                        if (char === ' ' || char === '👋') {
+                        if (char === ' ' || char === 'ðŸ‘‹') {
                             return char;
                         }
                         return chars[Math.floor(Math.random() * chars.length)];
@@ -1146,7 +1146,7 @@
         });
 
         L.tileLayer('https://watercolormaps.collection.cooperhewitt.org/tile/watercolor/{z}/{x}/{y}.jpg', {
-            attribution: '© Stamen Design, © OpenStreetMap contributors',
+            attribution: 'Â© Stamen Design, Â© OpenStreetMap contributors',
             maxZoom: 16
         }).addTo(map);
 
@@ -1301,7 +1301,7 @@
         window.addEventListener('resize', updateProgressBar);
         updateProgressBar();
 
-        // ── 2. GLITCH EFFECT on hero name ─────────────────────────────────
+        // â”€â”€ 2. GLITCH EFFECT on hero name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const heroName = document.querySelector('.hero-name');
         if (heroName) {
             setInterval(() => {
@@ -1312,7 +1312,7 @@
             }, 3000);
         }
 
-        // ── 3. TYPING EFFECT on hero name ────────────────────────────────
+        // â”€â”€ 3. TYPING EFFECT on hero name â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         (function() {
             const nameEl = document.querySelector('.hero-name');
             if (!nameEl) return;
@@ -1322,7 +1322,7 @@
 
             function runTyping() {
                 nameEl.textContent = '';
-                // Add blinking cursor via ::after — we toggle a class
+                // Add blinking cursor via ::after â€” we toggle a class
                 nameEl.classList.add('typing-cursor');
                 let i = 0;
                 function type() {
@@ -1342,7 +1342,7 @@
             setTimeout(runTyping, 1300);
         })();
 
-        // ── 4. MAGNETIC BUTTONS ───────────────────────────────────────────
+        // â”€â”€ 4. MAGNETIC BUTTONS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         document.querySelectorAll('.magnetic').forEach(el => {
             el.addEventListener('mousemove', function(e) {
                 const rect = this.getBoundingClientRect();
@@ -1357,9 +1357,9 @@
             });
         });
 
-        // ── 6. SKILL TAG RIPPLE — removed ─────────────────────────────
+        // â”€â”€ 6. SKILL TAG RIPPLE â€” removed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-        // ── 7. CURSOR TRAIL ───────────────────────────────────────────────
+        // â”€â”€ 7. CURSOR TRAIL â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         (function() {
             let lastTrail = 0;
             const TRAIL_COLORS = ['var(--cyan)', 'var(--pink)', 'var(--yellow)'];
@@ -1379,7 +1379,7 @@
             });
         })();
 
-        // ── 5. HIRE EASTER EGG ───────────────────────────────────────────
+        // â”€â”€ 5. HIRE EASTER EGG â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         let hireBuffer = '';
         document.addEventListener('keydown', e => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -1394,7 +1394,7 @@
             // Toast
             const toast = document.createElement('div');
             toast.className = 'hire-toast';
-            toast.innerHTML = '🎉 Let\'s build something amazing! <a href="mailto:hk998035@gmail.com" style="color:inherit;font-weight:900;text-decoration:underline;">Email me →</a>';
+            toast.innerHTML = 'ðŸŽ‰ Let\'s build something amazing! <a href="mailto:hk998035@gmail.com" style="color:inherit;font-weight:900;text-decoration:underline;">Email me â†’</a>';
             document.body.appendChild(toast);
             setTimeout(() => toast.classList.add('visible'), 50);
             setTimeout(() => { toast.classList.remove('visible'); setTimeout(() => toast.remove(), 500); }, 4000);
@@ -1421,3 +1421,4 @@
     </script>
 </body>
 </html>
+
