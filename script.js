@@ -1,4 +1,4 @@
-﻿class TerminalResume {
+class TerminalResume {
   constructor() {
     this.output = document.getElementById("output");
     this.input = document.getElementById("command-input");
@@ -69,34 +69,36 @@
   loadProjects() {
     this.projects = [
       {
-        title: "Interactive Terminal Resume",
-        description: "A unique terminal-based resume with interactive features",
-        image: "path/to/project-image.jpg",
-        technologies: ["JavaScript", "HTML", "CSS"],
-        demo: "https://demo.example.com",
-        repo: "https://github.com/example/repo",
+        title: "EWTCS",
+        description: "Hospital & Medical College Management System built with a team for JECRC University.",
+        image: "", // Optionally add a real image path if desired later
+        technologies: ["Java", "Full-Stack", "MySQL"],
+        demo: "https://github.com/somuyakhandelwal/EWTCS",
+        repo: "https://github.com/somuyakhandelwal/EWTCS",
       },
-      // Add more projects
     ];
   }
 
   loadSkills() {
     this.skills = {
-      programming: {
-        JavaScript: 95,
-        Python: 90,
+      frontend: {
+        JavaScript: 90,
+        TypeScript: 80,
         "React.js": 85,
-        "Node.js": 88,
+        HTML: 95,
+        CSS: 90
       },
-      cloud: {
-        "Google Cloud": 92,
-        AWS: 85,
-        Azure: 80,
+      backend: {
+        "Node.js": 85,
+        Python: 90,
+        Java: 80,
+        Express: 80
       },
-      databases: {
-        MongoDB: 90,
-        PostgreSQL: 85,
-        Redis: 82,
+      cloud_and_db: {
+        "Google Cloud": 85,
+        Docker: 80,
+        MongoDB: 85,
+        SQL: 85
       },
     };
   }
@@ -669,7 +671,7 @@
       // Format weather data
       const weatherHTML = `<div class="weather-container">
         <div class="weather-header">
-          <span style="color: #ffff00; font-weight: bold;">ðŸŒ¤ï¸ Weather for ${
+          <span style="color: #ffff00; font-weight: bold;">ðŸŒ¤ï¸🌤️ Weather for ${
             data.name
           }, ${data.sys.country}</span>
         </div>
@@ -721,7 +723,7 @@
       const sanitizedExpression = expression.replace(/[^0-9+\-*/().%\s]/g, "");
 
       // Evaluate the expression
-      const result = eval(sanitizedExpression);
+      const result = Function('return ' + sanitizedExpression)();
 
       if (isNaN(result) || !isFinite(result)) {
         throw new Error("Invalid result");
