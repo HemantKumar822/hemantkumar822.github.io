@@ -22,6 +22,8 @@ class TerminalResume {
     this.themeModal = document.getElementById("theme-modal");
     this.projectsModal = document.getElementById("projects-modal");
     this.skillsModal = document.getElementById("skills-modal");
+    this.languageModal = document.getElementById("language-modal");
+    this.languageToggle = document.getElementById("language-toggle");
 
     // Initialize theme selector
     this.themeToggle = document.getElementById("theme-toggle");
@@ -844,12 +846,12 @@ class TerminalResume {
     asciiArt.style.fontSize = "10px";
     asciiArt.style.fontFamily = "'Fira Code', monospace";
     asciiArt.style.lineHeight = "1";
-    asciiArt.innerHTML = `â–ˆâ–ˆâ–ˆâ•—   â–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—
-â–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â•â–ˆâ–ˆâ•—
-â–ˆâ–ˆâ•”â–ˆâ–ˆâ–ˆâ–ˆâ•”â–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•”â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘
-â–ˆâ–ˆâ•‘â•šâ–ˆâ–ˆâ•”â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘
-â–ˆâ–ˆâ•‘ â•šâ•â• â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘â•šâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•”â•
-â•šâ•â•     â•šâ•â•â•šâ•â•  â•šâ•â•â•šâ•â•  â•šâ•â•â•šâ•â• â•šâ•â•â•â•â•â• `;
+    asciiArt.innerHTML = `███╗   ███╗ █████╗ ██████╗ ██╗ ██████╗
+████╗ ████║██╔══██╗██╔══██╗██║██╔═══██╗
+██╔████╔██║███████║██████╔╝██║██║   ██║
+██║╚██╔╝██║██╔══██║██╔══██╗██║██║   ██║
+██║ ╚═╝ ██║██║  ██║██║  ██║██║╚██████╔╝
+╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝ ╚═════╝ `;
     terminalContent.appendChild(asciiArt);
 
     // Add divider
@@ -872,7 +874,7 @@ class TerminalResume {
 
     // Add role
     const role = document.createElement("div");
-    role.textContent = "AI Developer â€¢ Full-Stack â€¢ Builder";
+    role.textContent = "AI Developer • Full-Stack • Builder";
     role.style.color = "#666666";
     role.style.fontSize = "10px";
     role.style.fontFamily = "'Fira Code', monospace";
@@ -895,7 +897,7 @@ class TerminalResume {
     promptContainer.style.marginTop = "10px";
 
     const prompt = document.createElement("span");
-    prompt.textContent = "âžœ";
+    prompt.textContent = "➜";
     prompt.style.color = "#87af87";
     prompt.style.marginRight = "8px";
     prompt.style.fontSize = "14px";
@@ -916,7 +918,7 @@ class TerminalResume {
 
     // Create a mini help menu
     const helpTitle = document.createElement("div");
-    helpTitle.textContent = "ðŸš€ Available Commands";
+    helpTitle.textContent = "🚀 Available Commands";
     helpTitle.style.color = "#ffff00";
     helpTitle.style.fontSize = "12px";
     helpTitle.style.fontWeight = "bold";
@@ -945,7 +947,7 @@ class TerminalResume {
       cmdLine.style.marginBottom = "4px";
 
       const cmdName = document.createElement("span");
-      cmdName.textContent = "â€¢ " + item.cmd;
+      cmdName.textContent = "• " + item.cmd;
       cmdName.style.color = "#98fb98";
       cmdName.style.width = "80px";
       cmdLine.appendChild(cmdName);
@@ -980,7 +982,7 @@ class TerminalResume {
       cmdLine.style.marginBottom = "4px";
 
       const cmdName = document.createElement("span");
-      cmdName.textContent = "â€¢ " + item.cmd;
+      cmdName.textContent = "• " + item.cmd;
       cmdName.style.color = "#98fb98";
       cmdName.style.width = "80px";
       cmdLine.appendChild(cmdName);
@@ -1031,7 +1033,7 @@ class TerminalResume {
     this.scrollToBottom(outputElement.closest(".terminal-content"));
   }
 
-  // â”€â”€â”€ Utility helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Utility helpers ─────────────────────────────────────────────────────
 
   scrollToBottom(container) {
     if (container) container.scrollTop = container.scrollHeight;
@@ -1057,22 +1059,22 @@ class TerminalResume {
     return content ? content.querySelector("[id^='output']") || content.querySelector(".output") : null;
   }
 
-  // â”€â”€â”€ Initialisation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Initialisation ───────────────────────────────────────────────────────
 
   init() {
     const outputEl = document.getElementById("output");
     if (!outputEl) return;
 
     const banner = `<pre style="color:#d4843e;font-size:11px;line-height:1.1;margin:0">
-â–ˆâ–ˆâ•—  â–ˆâ–ˆâ•—â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—â–ˆâ–ˆâ–ˆâ•—   â–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ•—   â–ˆâ–ˆâ•—â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—
-â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â•â•â•â–ˆâ–ˆâ–ˆâ–ˆâ•— â–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•—â–ˆâ–ˆâ–ˆâ–ˆâ•—  â–ˆâ–ˆâ•‘â•šâ•â•â–ˆâ–ˆâ•”â•â•â•
-â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—  â–ˆâ–ˆâ•”â–ˆâ–ˆâ–ˆâ–ˆâ•”â–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â–ˆâ–ˆâ•— â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘
-â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â•  â–ˆâ–ˆâ•‘â•šâ–ˆâ–ˆâ•”â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•”â•â•â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘â•šâ–ˆâ–ˆâ•—â–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘
-â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ–ˆâ•—â–ˆâ–ˆâ•‘ â•šâ•â• â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘  â–ˆâ–ˆâ•‘â–ˆâ–ˆâ•‘ â•šâ–ˆâ–ˆâ–ˆâ–ˆâ•‘   â–ˆâ–ˆâ•‘
-â•šâ•â•  â•šâ•â•â•šâ•â•â•â•â•â•â•â•šâ•â•     â•šâ•â•â•šâ•â•  â•šâ•â•â•šâ•â•  â•šâ•â•â•â•   â•šâ•â•</pre>`;
+██╗  ██╗███████╗███╗   ███╗ █████╗ ███╗   ██╗████████╗
+██║  ██║██╔════╝████╗ ████║██╔══██╗████╗  ██║╚══██╔══╝
+███████║█████╗  ██╔████╔██║███████║██╔██╗ ██║   ██║
+██╔══██║██╔══╝  ██║╚██╔╝██║██╔══██║██║╚██╗██║   ██║
+██║  ██║███████╗██║ ╚═╝ ██║██║  ██║██║ ╚████║   ██║
+╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝╚═╝  ╚═══╝   ╚═╝</pre>`;
     this.printToOutput(outputEl, banner);
-    this.printToOutput(outputEl, `<span style="color:#8be9fd">  AI Developer â€¢ Full-Stack â€¢ Builder</span>`);
-    this.printToOutput(outputEl, `<span style="color:#6272a4">  â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`);
+    this.printToOutput(outputEl, `<span style="color:#8be9fd">  AI Developer • Full-Stack • Builder</span>`);
+    this.printToOutput(outputEl, `<span style="color:#6272a4">  ─────────────────────────────────────────────</span>`);
     this.printToOutput(outputEl, `<span style="color:#f8f8f2">  Welcome! Type </span><span style="color:#50fa7b">help</span><span style="color:#f8f8f2"> to see available commands.</span>`);
     this.printToOutput(outputEl, "");
     this.applyTheme(this.currentTheme);
@@ -1085,9 +1087,51 @@ class TerminalResume {
     }
   }
 
-  // â”€â”€â”€ Event listeners â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Event listeners ──────────────────────────────────────────────────────
 
   setupEventListeners() {
+
+    // Window controls
+    const closeBtn = document.querySelector(".terminal-buttons .close");
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        window.location.href = "index.html";
+      });
+    }
+
+    const minBtn = document.querySelector(".terminal-buttons .minimize");
+    if (minBtn) {
+      minBtn.addEventListener("click", () => {
+        if (this.terminalContainer) {
+          this.terminalContainer.style.display = this.terminalContainer.style.display === "none" ? "block" : "none";
+        }
+      });
+    }
+
+    const maxBtn = document.querySelector(".terminal-buttons .maximize");
+    if (maxBtn) {
+      maxBtn.addEventListener("click", () => {
+        if (this.terminal) {
+          this.terminal.classList.toggle("maximized");
+          if (this.terminal.classList.contains("maximized")) {
+            this.terminal.style.width = "100vw";
+            this.terminal.style.height = "100vh";
+            this.terminal.style.maxWidth = "100%";
+            this.terminal.style.maxHeight = "100%";
+            this.terminal.style.borderRadius = "0";
+            this.terminal.style.margin = "0";
+          } else {
+            this.terminal.style.width = "";
+            this.terminal.style.height = "";
+            this.terminal.style.maxWidth = "";
+            this.terminal.style.maxHeight = "";
+            this.terminal.style.borderRadius = "";
+            this.terminal.style.margin = "";
+          }
+        }
+      });
+    }
+
     // Keyboard input on main input
     if (this.input) {
       this.input.addEventListener("keydown", (e) => this.handleKeyDown(e, 0));
@@ -1115,7 +1159,7 @@ class TerminalResume {
     });
 
     // Close modal buttons
-    document.querySelectorAll(".modal-close").forEach((btn) => {
+    document.querySelectorAll(".close-button").forEach((btn) => {
       btn.addEventListener("click", () => {
         const modal = btn.closest(".modal-overlay");
         if (modal) this.closeModal(modal);
@@ -1138,6 +1182,40 @@ class TerminalResume {
       if (this.contextMenu) this.contextMenu.classList.remove("active");
     });
 
+    // Language toggle button
+    if (this.languageToggle) {
+      this.languageToggle.addEventListener("click", () => {
+        if (this.languageModal) this.showModal(this.languageModal);
+      });
+    }
+
+    // Language modal options
+    document.querySelectorAll(".language-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        this.closeModal(this.languageModal);
+        const outputEl = this.getOutputElement();
+        if (outputEl) {
+          this.printToOutput(outputEl, `Language changed to: ${btn.textContent}`, "info");
+        }
+      });
+    });
+
+    // Context menu actions
+    document.querySelectorAll(".menu-item").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const action = e.target.dataset.action;
+        if (action === "split-h" || action === "split-v") {
+          this.splitTerminal(action);
+        } else if (action === "close-split") {
+          const activeContent = this.terminals[this.activeTerminal]?.input?.closest(".terminal-content");
+          if (activeContent) {
+            this.closeSplit(activeContent);
+          }
+        }
+      });
+    });
+
+
     // Focus input when clicking terminal
     if (this.terminal) {
       this.terminal.addEventListener("click", () => {
@@ -1159,7 +1237,7 @@ class TerminalResume {
         const outputEl = termData.input.closest(".terminal-content")?.querySelector("[id^='output']")
           || termData.input.closest(".terminal-content")?.querySelector(".output");
         if (outputEl) {
-          this.printToOutput(outputEl, `<span style="color:#87af87">âžœ</span>  <span style="color:#f8f8f2">${this.escapeHtml(cmd)}</span>`);
+          this.printToOutput(outputEl, `<span style="color:#87af87">➜</span>  <span style="color:#f8f8f2">${this.escapeHtml(cmd)}</span>`);
           this.processCommand(cmd.toLowerCase(), outputEl);
         }
       }
@@ -1192,7 +1270,7 @@ class TerminalResume {
     return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
   }
 
-  // â”€â”€â”€ Command processor â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Command processor ────────────────────────────────────────────────────
 
   processCommand(cmd, outputEl) {
     const parts = cmd.split(" ");
@@ -1227,9 +1305,12 @@ class TerminalResume {
     if (outputEl) outputEl.innerHTML = "";
   }
 
-  splitTerminal() {
+  splitTerminal(direction = "split-h") {
     const container = document.querySelector(".terminal-container");
     if (!container) return;
+    if (!container.classList.contains("split-h") && !container.classList.contains("split-v")) {
+      container.classList.add(direction);
+    }
     const newContent = document.createElement("div");
     newContent.className = "terminal-content";
     const newOutput = document.createElement("div");
@@ -1239,7 +1320,7 @@ class TerminalResume {
 
     const inputRow = document.createElement("div");
     inputRow.className = "input-line";
-    inputRow.innerHTML = `<span class="prompt">âžœ </span>`;
+    inputRow.innerHTML = `<span class="prompt">➜ </span>`;
     const newInput = document.createElement("input");
     newInput.type = "text";
     newInput.className = "command-input";
@@ -1262,20 +1343,20 @@ class TerminalResume {
     newContent.prepend(closeBtn);
   }
 
-  // â”€â”€â”€ Help â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Help ────────────────────────────────────────────────────────────────
 
   showHelp(outputEl) {
     const lines = [
-      `<span style="color:#ffff00;font-weight:bold">ðŸš€ Available Commands</span>`,
+      `<span style="color:#ffff00;font-weight:bold">🚀 Available Commands</span>`,
       "",
-      `<span style="color:#00ffff">â”€â”€ Info â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#00ffff">── Info ──────────────────────────────</span>`,
       `  <span style="color:#50fa7b">about</span>          Professional summary`,
       `  <span style="color:#50fa7b">experience</span>     Work & community history`,
       `  <span style="color:#50fa7b">education</span>      Academic background`,
       `  <span style="color:#50fa7b">skills</span>         Technical skills`,
       `  <span style="color:#50fa7b">contact</span>        Get in touch`,
       "",
-      `<span style="color:#00ffff">â”€â”€ Tools â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#00ffff">── Tools ─────────────────────────────</span>`,
       `  <span style="color:#50fa7b">weather [city]</span>  Live weather`,
       `  <span style="color:#50fa7b">calc [expr]</span>     Calculator`,
       `  <span style="color:#50fa7b">matrix</span>          Matrix rain effect`,
@@ -1290,17 +1371,17 @@ class TerminalResume {
     lines.forEach((l) => this.printToOutput(outputEl, l));
   }
 
-  // â”€â”€â”€ Content commands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ─── Content commands ─────────────────────────────────────────────────────
 
   showAbout(outputEl) {
     const lines = [
-      `<span style="color:#ffff00;font-weight:bold">â”€â”€ About Me â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#ffff00;font-weight:bold">── About Me ───────────────────────────</span>`,
       "",
       `  <span style="color:#8be9fd">Name     </span>  Hemant Kumar`,
       `  <span style="color:#8be9fd">Role     </span>  AI & Software Developer`,
       `  <span style="color:#8be9fd">Location </span>  Jaipur, Rajasthan, India`,
       `  <span style="color:#8be9fd">University</span> JECRC University`,
-      `  <span style="color:#8be9fd">Degree   </span>  B.Tech CSE (AI & Data Science), 2025â€“2029`,
+      `  <span style="color:#8be9fd">Degree   </span>  B.Tech CSE (AI & Data Science), 2025–2029`,
       "",
       `  I'm a developer passionate about machine learning,`,
       `  full-stack development, and building real-world software.`,
@@ -1316,22 +1397,22 @@ class TerminalResume {
 
   showExperience(outputEl) {
     const lines = [
-      `<span style="color:#ffff00;font-weight:bold">â”€â”€ Experience â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#ffff00;font-weight:bold">── Experience ─────────────────────────</span>`,
       "",
       `  <span style="color:#50fa7b;font-weight:bold">JECRC AI/ML Community</span>`,
       `  <span style="color:#8be9fd">Role      </span>  Community Lead`,
-      `  <span style="color:#8be9fd">Period    </span>  2025 â€“ Present`,
+      `  <span style="color:#8be9fd">Period    </span>  2025 – Present`,
       `  <span style="color:#8be9fd">Location  </span>  Jaipur, India`,
-      `    â€¢ Organising workshops, seminars & hackathons on AI/ML`,
-      `    â€¢ Mentoring peers in machine learning concepts`,
-      `    â€¢ Building a collaborative learning community at JECRC`,
+      `    • Organising workshops, seminars & hackathons on AI/ML`,
+      `    • Mentoring peers in machine learning concepts`,
+      `    • Building a collaborative learning community at JECRC`,
       "",
-      `  <span style="color:#50fa7b;font-weight:bold">EWTCS â€“ Hospital Management System</span>`,
+      `  <span style="color:#50fa7b;font-weight:bold">EWTCS – Hospital Management System</span>`,
       `  <span style="color:#8be9fd">Role      </span>  Collaborator (College Project)`,
-      `  <span style="color:#8be9fd">Period    </span>  2025 â€“ Present`,
+      `  <span style="color:#8be9fd">Period    </span>  2025 – Present`,
       `  <span style="color:#8be9fd">Tech      </span>  Full-stack web, Java, MySQL`,
-      `    â€¢ Collaborated on a hospital & medical college management system`,
-      `    â€¢ Contributed to core modules and system architecture`,
+      `    • Collaborated on a hospital & medical college management system`,
+      `    • Contributed to core modules and system architecture`,
       "",
     ];
     lines.forEach((l) => this.printToOutput(outputEl, l));
@@ -1339,14 +1420,14 @@ class TerminalResume {
 
   showEducation(outputEl) {
     const lines = [
-      `<span style="color:#ffff00;font-weight:bold">â”€â”€ Education â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#ffff00;font-weight:bold">── Education ──────────────────────────</span>`,
       "",
       `  <span style="color:#50fa7b;font-weight:bold">JECRC University, Jaipur</span>`,
-      `  <span style="color:#8be9fd">Degree  </span>  B.Tech â€“ CSE (AI & Data Science)`,
-      `  <span style="color:#8be9fd">Period  </span>  2025 â€“ 2029`,
+      `  <span style="color:#8be9fd">Degree  </span>  B.Tech – CSE (AI & Data Science)`,
+      `  <span style="color:#8be9fd">Period  </span>  2025 – 2029`,
       `  <span style="color:#8be9fd">Stream  </span>  Artificial Intelligence & Data Science`,
-      `    â€¢ Specialising in machine learning, deep learning & data science`,
-      `    â€¢ Active in the AI/ML Community as a lead`,
+      `    • Specialising in machine learning, deep learning & data science`,
+      `    • Active in the AI/ML Community as a lead`,
       "",
     ];
     lines.forEach((l) => this.printToOutput(outputEl, l));
@@ -1354,7 +1435,7 @@ class TerminalResume {
 
   showSkills(outputEl) {
     const lines = [
-      `<span style="color:#ffff00;font-weight:bold">â”€â”€ Skills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#ffff00;font-weight:bold">── Skills ──────────────────────────────</span>`,
       "",
       `  <span style="color:#00ffff">AI / ML</span>`,
       `    Python  TensorFlow  PyTorch  scikit-learn  NumPy  Pandas`,
@@ -1377,14 +1458,14 @@ class TerminalResume {
 
   showContact(outputEl) {
     const lines = [
-      `<span style="color:#ffff00;font-weight:bold">â”€â”€ Contact â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€</span>`,
+      `<span style="color:#ffff00;font-weight:bold">── Contact ─────────────────────────────</span>`,
       "",
       `  <span style="color:#8be9fd">Email    </span>  <span style="color:#50fa7b">hk998035@gmail.com</span>`,
       `  <span style="color:#8be9fd">GitHub   </span>  <span style="color:#50fa7b">github.com/HemantKumar822</span>`,
       `  <span style="color:#8be9fd">LinkedIn </span>  <span style="color:#50fa7b">linkedin.com/in/hemant-kumar-b8a1243b1</span>`,
       `  <span style="color:#8be9fd">Instagram</span>  <span style="color:#50fa7b">instagram.com/hemant.curious</span>`,
       "",
-      `  Feel free to reach out â€“ I'm always open to`,
+      `  Feel free to reach out – I'm always open to`,
       `  collaborations, projects, and opportunities!`,
       "",
     ];
